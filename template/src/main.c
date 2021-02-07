@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
 
     // builder = gtk_builder_new();
     // gtk_builder_add_from_file (builder, "glade/window_main.glade", NULL);
-    // Update October 2019: The line below replaces the 2 lines above
     builder = gtk_builder_new_from_file("glade/window_main.glade");
     //gtk_builder_new_from_file(const gchar *filename ): builds GTK UI definition in the given file. 
     //gtk_builder builds a widget from our glade file.
