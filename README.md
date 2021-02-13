@@ -4,4 +4,3 @@
 
 #I used the instructions from the following two websites, which contains concise resources for understanding and implementing basic glade application.
 # https://prognotes.net/2016/03/gtk-3-c-code-hello-world-tutorial-using-glade-3/
-# https://www.cs.uni.edu/~okane/Code/Glade%20Cookbook/
