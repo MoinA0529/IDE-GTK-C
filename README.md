@@ -7,9 +7,9 @@
 # compile
 # Run the code respectively
 
-$ chmod u+x compile.script 
-$ ./compile.script
-$ ./part1-bin
+# $ chmod u+x compile.script 
+# $ ./compile.script
+# $ ./part1-bin
 
 # I used the instructions from the following website, which contains concise resources for understanding and implementing basic glade application.
 # https://prognotes.net/2016/03/gtk-3-c-code-hello-world-tutorial-using-glade-3/
