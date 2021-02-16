@@ -3,9 +3,6 @@
 # Template folder contains the basic template files used to open and initialize application with some basic command line arguments
 
 # To run the application under text_editor_menu_bar folder type the following in terminal
-# To make the file executable
-# compile
-# Run the code respectively
 
 # $ chmod u+x compile.script 
 # $ ./compile.script
