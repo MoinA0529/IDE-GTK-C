@@ -6,8 +6,6 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 #include <stdio.h>
 
 // Widget for Search Bar
@@ -246,9 +244,9 @@ int main(int argc, char *argv[]) {
 	g_signal_connect(G_OBJECT(about), "activate", G_CALLBACK(about), (gpointer)window);
 	g_signal_connect(G_OBJECT(paste), "activate", G_CALLBACK(paste), buffer);
 	g_signal_connect(G_OBJECT(find), "activate", G_CALLBACK(display_search_bar), &search_bar);
-	g_signal_connect(G_OBJECT(open), "activate", G_CALLBACK(open), &openDialog);
-	g_signal_connect(G_OBJECT(new), "activate", G_CALLBACK(new), &newDialog);
-	g_signal_connect(G_OBJECT(save), "activate", G_CALLBACK(save), &saveDialog);
+	g_signal_connect(G_OBJECT(open), "activate", G_CALLBACK(open_dialog_selected), &openDialog);
+	g_signal_connect(G_OBJECT(new), "activate", G_CALLBACK(new_dialog_selected), &newDialog);
+	g_signal_connect(G_OBJECT(save), "activate", G_CALLBACK(save_dialog_selected), &saveDialog);
 	g_signal_connect(buffer, "changed", G_CALLBACK(update_status_bar), status_bar);
 	g_signal_connect_object(buffer, "mark_set", G_CALLBACK(cursor_change), status_bar, 0);
 
@@ -315,7 +313,12 @@ void new_dialog_selected(GtkWidget *widget , NEW_DIALOG *ndlog) {
 // Function for open menu item
 void open_dialog_selected(GtkWidget *widget, OPEN_DIALOG *odlog) {
 	GtkWidget *dialog;
-	dialog = gtk_file_chooser_dialog_new ("Open File", GTK_WINDOW(odlog->window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dialog = gtk_file_chooser_dialog_new ("Open File",
+	                                      GTK_WINDOW(odlog->window),
+	                                      GTK_FILE_CHOOSER_ACTION_OPEN,
+	                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 		gchar *filename;
 		gchar *contents;
