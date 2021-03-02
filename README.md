@@ -4,7 +4,7 @@ Template folder contains the basic template files used to open and initialize ap
 
 To run the application under text_editor_menu_bar folder type the following in terminal
 
-$ sh compile.sh editor
+$ sh compile.sh editor   \n
 $ ./editor
 
 I used the instructions from the following website, which contains concise resources for understanding and implementing basic glade application.
