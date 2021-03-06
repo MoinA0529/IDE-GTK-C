@@ -1,11 +1,12 @@
 #include <stdlib.h>
-#include <gtk/gtkx.h>
-#include <sys/types.h>
+#include <gtk/gtk.h>
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <gdk/gdkkeysyms.h>
 #include <stdio.h>
 
 // Widget for Search Bar
@@ -60,16 +61,16 @@ void display_search_bar(GtkWidget *widget, SEARCH_BAR *sbar);
 void search(GtkWidget *search, SEARCH_BAR *sbar);
 
 // Function for search bar - next
-void next(GtkWidget *next, SEARCH_BAR *sbar);
+void next_button_clicked(GtkWidget *next, SEARCH_BAR *sbar);
 
 // About menu item is clicked
 void about(GtkWidget *widget, gpointer data);
 
 
 // Following three functions are invoked when Copy/Cut/Paste are selected from menu
-void copy(GtkWidget *widget, GtkTextBuffer *buffer);
-void cut(GtkWidget *widget, GtkTextBuffer *buffer);
-void paste(GtkWidget *widget, GtkTextBuffer *buffer);
+void copy_to_clipboard(GtkWidget *widget, GtkTextBuffer *buffer);
+void cut_to_clipboard(GtkWidget *widget, GtkTextBuffer *buffer);
+void paste_from_clipboard(GtkWidget *widget, GtkTextBuffer *buffer);
 
 // Functions for status bar Ln:__ Col: __
 void update_status_bar(GtkTextBuffer *buffer, GtkStatusbar *status_bar);
@@ -79,9 +80,10 @@ int main(int argc, char *argv[]) {
 	// Window layout pointers
 	GtkWidget *window;
 	GtkWidget *vbox; // VBox is a container that organizes child widgets into a single column.
-	GtkWidget *hbox; // organizes into a single row
+	GtkWidget *hbox; // organizes ssearch bar into a single row
 	GtkWidget *status_bar;
 
+	GtkClipboard *clipboard;
 	// Text view variable definitions
 	GtkWidget *text_view;
 	GtkWidget *scrolled_window;
@@ -191,7 +193,7 @@ int main(int argc, char *argv[]) {
 	gtk_menu_shell_append(GTK_MENU_SHELL(MenuBar), help);
 
 	gtk_box_pack_start(GTK_BOX(vbox), MenuBar, FALSE, FALSE, 0);
-
+	// Text view
 	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 	text_view = gtk_text_view_new();
 	gtk_container_add(GTK_CONTAINER(scrolled_window), text_view);
@@ -202,14 +204,15 @@ int main(int argc, char *argv[]) {
 	search_bar.textView = text_view;
 	search_bar.searchEntry = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(hbox), search_bar.searchEntry, TRUE, TRUE, 0);
+
 	//search button
 	search_bar.searchButton = gtk_button_new_with_label("Search");
-	gtk_box_pack_start(GTK_BOX(hbox), search_bar.searchEntry, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), search_bar.searchButton, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(search_bar.searchButton), "clicked", G_CALLBACK(search), &search_bar);
 	// next button
 	search_bar.nextButton = gtk_button_new_with_label("Next");
-	gtk_box_pack_start(GTK_BOX(hbox), search_bar.searchEntry, FALSE, FALSE, 0);
-	g_signal_connect(G_OBJECT(search_bar.nextButton), "clicked", G_CALLBACK(next), &search_bar);
+	gtk_box_pack_start(GTK_BOX(hbox), search_bar.nextButton, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(search_bar.nextButton), "clicked", G_CALLBACK(next_button_clicked), &search_bar);
 	// close button
 	search_bar.quitButton = gtk_button_new_with_label("Close");
 	gtk_box_pack_start(GTK_BOX(hbox), search_bar.quitButton, FALSE, FALSE, 0);
@@ -239,10 +242,10 @@ int main(int argc, char *argv[]) {
 
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(quit), "activate", G_CALLBACK(gtk_main_quit), NULL);
-	g_signal_connect(G_OBJECT(copy), "activate", G_CALLBACK(copy), buffer);
-	g_signal_connect(G_OBJECT(cut), "activate", G_CALLBACK(cut), buffer);
+	g_signal_connect(G_OBJECT(copy), "activate", G_CALLBACK(copy_to_clipboard), buffer);
+	g_signal_connect(G_OBJECT(cut), "activate", G_CALLBACK(cut_to_clipboard), buffer);
 	g_signal_connect(G_OBJECT(about), "activate", G_CALLBACK(about), (gpointer)window);
-	g_signal_connect(G_OBJECT(paste), "activate", G_CALLBACK(paste), buffer);
+	g_signal_connect(G_OBJECT(paste), "activate", G_CALLBACK(paste_from_clipboard), buffer);
 	g_signal_connect(G_OBJECT(find), "activate", G_CALLBACK(display_search_bar), &search_bar);
 	g_signal_connect(G_OBJECT(open), "activate", G_CALLBACK(open_dialog_selected), &openDialog);
 	g_signal_connect(G_OBJECT(new), "activate", G_CALLBACK(new_dialog_selected), &newDialog);
@@ -376,7 +379,7 @@ void search(GtkWidget *search, SEARCH_BAR *sbar) {
 }
 
 // Function for search bar - next
-void next(GtkWidget *next, SEARCH_BAR *sbar) {
+void next_button_clicked(GtkWidget *next, SEARCH_BAR *sbar) {
 	const gchar *text;
 	GtkTextBuffer *buffer;
 	GtkTextMark *last_pos;
@@ -400,17 +403,17 @@ void about(GtkWidget *widget, gpointer data) {
 
 
 // Following three functions are invoked when Copy/Cut/Paste are selected from menu
-void copy(GtkWidget *widget, GtkTextBuffer *buffer) {
+void copy_to_clipboard(GtkWidget *widget, GtkTextBuffer *buffer) {
 	GtkClipboard *clipboard;
 	clipboard = gtk_clipboard_get(GDK_NONE);
 	gtk_text_buffer_copy_clipboard(buffer, clipboard);
 }
-void cut(GtkWidget *widget, GtkTextBuffer *buffer) {
+void cut_to_clipboard(GtkWidget *widget, GtkTextBuffer *buffer) {
 	GtkClipboard *clipboard;
 	clipboard = gtk_clipboard_get(GDK_NONE);
 	gtk_text_buffer_cut_clipboard(buffer, clipboard, TRUE);
 }
-void paste(GtkWidget *widget, GtkTextBuffer *buffer) {
+void paste_from_clipboard(GtkWidget *widget, GtkTextBuffer *buffer) {
 	GtkClipboard *clipboard;
 	clipboard = gtk_clipboard_get(GDK_NONE);
 	gtk_text_buffer_paste_clipboard(buffer, clipboard, NULL, TRUE);
