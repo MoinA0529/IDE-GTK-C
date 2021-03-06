@@ -17,7 +17,7 @@ typedef struct _SEARCH_BAR {
 	GtkWidget *searchButton;
 	GtkWidget *nextButton;
 	GtkWidget *quitButton;
-	GtkWidget *textView; // To show display the characters being typed ****doubt****
+	GtkWidget *textView; 
 } SEARCH_BAR;
 
 
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
 	gtk_box_pack_end(GTK_BOX(vbox), status_bar, FALSE, FALSE, 0);
 
 	newDialog.statusBar = status_bar;
-
+	// connecting signals with widgets
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(quit), "activate", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(copy), "activate", G_CALLBACK(copy_to_clipboard), buffer);
