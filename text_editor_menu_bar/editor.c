@@ -1,11 +1,4 @@
-#include <stdlib.h>
 #include <gtk/gtk.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <stdio.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdio.h>
 
@@ -17,9 +10,19 @@ typedef struct _SEARCH_BAR {
 	GtkWidget *searchButton;
 	GtkWidget *nextButton;
 	GtkWidget *quitButton;
-	GtkWidget *textView; 
+	GtkWidget *textView;
 } SEARCH_BAR;
 
+// structure for FIND_REPLACE
+typedef struct _FIND_REPLACE {
+	GtkWidget *searchEntry;
+	GtkWidget *replaceEntry;
+	GtkWidget *searchButton;
+	GtkWidget *replaceButton;
+	GtkWidget *quitButton;
+	GtkWidget *textView_R;
+	GtkWidget *textView_F;
+} REPLACE_BAR;
 
 // Initial dialog when the app is launched
 typedef struct _OPEN_DIALOG {
@@ -38,6 +41,11 @@ typedef struct _NEW_DIALOG {
 } NEW_DIALOG;
 
 // *** FUNCTION DECLARATIONS ***
+
+// Function for replace
+void replace_button_clicked(GtkWidget *replace_button);
+
+void replaceUtil (GtkTextView *text_view, const gchar *text, const gchar *text1, GtkTextIter *iter);
 
 // Function for save menu item
 void save_dialog_selected(GtkWidget *widget, OPEN_DIALOG *save);
@@ -239,7 +247,7 @@ int main(int argc, char *argv[]) {
 	gtk_box_pack_end(GTK_BOX(vbox), status_bar, FALSE, FALSE, 0);
 
 	newDialog.statusBar = status_bar;
-	// connecting signals with widgets
+
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(quit), "activate", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(copy), "activate", G_CALLBACK(copy_to_clipboard), buffer);
@@ -401,7 +409,6 @@ void about(GtkWidget *widget, gpointer data) {
 	gtk_widget_destroy(dialog);
 }
 
-
 // Following three functions are invoked when Copy/Cut/Paste are selected from menu
 void copy_to_clipboard(GtkWidget *widget, GtkTextBuffer *buffer) {
 	GtkClipboard *clipboard;
@@ -436,7 +443,30 @@ void update_status_bar(GtkTextBuffer *buffer, GtkStatusbar *statusbar) {
 void cursor_change(GtkTextBuffer *buffer, const GtkTextIter *new_location, GtkTextMark *mark, gpointer data) {
 	update_status_bar(buffer, GTK_STATUSBAR(data));
 }
+void replace_button_clicked(GtkWidget *replace_button) {
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW());//
+	gtk_text_buffer_get_start_iter(buffer, &iter);
 
+}
+
+void replaceUtil (GtkTextView *text_view, const gchar *text, const gchar *text1, GtkTextIter *iter) {
+	GtkTextIter mstart, mend;
+	GtkTextBuffer *buffer;
+	gboolean found;
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW());//
+	found = gtk_text_iter_forward_search (iter, text, 0, &mstart, &mend, NULL);
+	if (found)
+	{
+		gtk_text_buffer_select_range (buffer, &mstart, &mend);
+		gtk_text_buffer_create_mark (buffer, "last_pos", &mend, FALSE);
+
+		int len = strlen(text1);
+		gtk_text_buffer_delete(buffer, &mstart, &mend);
+		gtk_text_buffer_insert(buffer, &mstart, text1, len);
+	}
+}
 
 // Note that accelerators are different from mnemonics. Accelerators are shortcuts for activating a menu item;
 // they appear alongside the menu item they're a shortcut for. For example Ctrl+Q might appear alongside the
