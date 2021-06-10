@@ -56,3 +56,5 @@ void on_window_main_destroy()
     gtk_main_quit();
     //exits out of the application
 }
+
+// Note : that accelerators are different from mnemonics. Accelerators are shortcuts for activating a menu item;
